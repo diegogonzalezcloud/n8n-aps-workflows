@@ -1,0 +1,147 @@
+{
+  "name": "Tool ACC Asset Patch",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "projectID"
+            },
+            {
+              "name": "id"
+            },
+            {
+              "name": "clientAssetId"
+            },
+            {
+              "name": "description"
+            },
+            {
+              "name": "status"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -32,
+        128
+      ],
+      "id": "92ba7b8d-2a40-49f8-916b-af60643c0d21",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "60652e32-efee-4c7e-be96-76bda34eec80",
+              "name": "error",
+              "value": "={{ $json.error.stack }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        192
+      ],
+      "id": "285f30c0-d380-4b68-af49-dfde90cbe03e",
+      "name": "Edit Fields ERROR"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"mode\": \"manual\",\n  \"keepOnlySet\": true,\n  \"values\": {\n    \"string\": [\n      {\n        \"name\": \"id\",\n        \"value\": \"{{ $('When Executed by Another Workflow').item.json.id.id }}\"\n      },\n      {\n        \"name\": \"statusId\",\n        \"value\": \"{{ $('When Executed by Another Workflow').item.json.id.status }}\"\n      },\n      {\n        \"name\": \"clientAssetId\",\n        \"value\": \"{{ $('When Executed by Another Workflow').item.json.id.clientAssetId }}\"\n      },\n      {\n        \"name\": \"description\",\n        \"value\": \"{{ $('When Executed by Another Workflow').item.json.id.description }}\"\n      }\n    ]\n  }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        32
+      ],
+      "id": "7964af64-83b6-4276-ae2f-ea7be46bf011",
+      "name": "Edit Fields SUCCESS"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://developer.api.autodesk.com/construction/assets/v2/projects/{{ $json.projectID }}/assets:batch-patch",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"{{ $json.id }}\":\n    {\n      \"statusId\": \"{{ $json.status }}\",\n      \"clientAssetId\": \"{{ $json.clientAssetId }}\",\n      \"description\": \"{{ $json.description }}\"\n    }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        160,
+        128
+      ],
+      "id": "aa10af4a-4add-434a-bf6a-19ba712ecf40",
+      "name": "HTTP Request PATCH 1 ACC Asset",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "notesInFlow": true,
+      "credentials": {
+        "oAuth2Api": {
+          "id": "QXmc9G5wmWEcZ8re",
+          "name": "APS OAuth2 API"
+        }
+      },
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request PATCH 1 ACC Asset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request PATCH 1 ACC Asset": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields SUCCESS",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields ERROR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "c1e97286-8da1-4fd2-a15a-95dc746edf26",
+  "meta": {
+    "instanceId": "ea95252a452a7564a2fb25be16e9c5bd87b54f41ac71cea81cbab2e1bf91ea19"
+  },
+  "id": "nRpQi2lpv07y-zWjMZ_Y9",
+  "tags": []
+}
